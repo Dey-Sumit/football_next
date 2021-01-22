@@ -18,3 +18,8 @@
 -  [ :x:] Settings Page
    -  [ ] NavBar
    -  [ ] Add Other Data
+
+### Check these out
+
+-  tailwindcss-gradients plugin
+-  tailwindcss-spinner plugin
