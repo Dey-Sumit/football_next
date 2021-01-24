@@ -7,11 +7,11 @@ const Team: FunctionComponent<{
    team: team
    showName?: boolean
    largeLogo?: boolean
-}> = ({ team, showName, largeLogo }) => {
+   closeSearch?: Function
+}> = ({ team, showName, largeLogo, closeSearch }) => {
    const dispatch = useTeamDispatch()
    const updateMyTeam = () => {
-      // if (closeSearch)
-      //     closeSearch();
+      if (closeSearch) closeSearch()
 
       dispatch(SET_MY_TEAM, team)
    }
@@ -20,7 +20,7 @@ const Team: FunctionComponent<{
    const logoClass = largeLogo ? 'logo-large' : 'logo-medium'
    return (
       <div
-         className='flex items-center justify-center p-5 text-center rounded-lg cursor-pointer boxShadow'
+         className='flex flex-col items-center justify-center p-5 text-center rounded-lg cursor-pointer boxShadow'
          onClick={updateMyTeam}>
          {/* //TODO NEXT IMAGE */}
          <img src={logo} alt='' className={logoClass} />

@@ -1,11 +1,5 @@
 // import axios from 'axios'
-import {
-   createContext,
-   Dispatch,
-   useContext,
-   useEffect,
-   useReducer,
-} from 'react'
+import { createContext, useContext, useReducer } from 'react'
 import { team } from '../types'
 import { SET_MY_TEAM } from './actionTypes'
 

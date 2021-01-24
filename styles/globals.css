@@ -19,6 +19,9 @@ body {
    box-shadow: 7px 7px 14px #131514, -7px -7px 14px #292d2c;
    /* background: linear-gradient(135deg, #202322, #1b1e1d); */
 }
+.boxShadow-inset {
+   box-shadow: inset 7px 7px 14px #131514, inset -7px -7px 14px #292d2c;
+}
 .logo-medium {
    width: 100px;
    height: 100px;
