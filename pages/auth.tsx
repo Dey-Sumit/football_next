@@ -24,7 +24,6 @@ export default function Auth() {
                <p className='my-2 text-gray-400'>
                   Lorem ipsum dolor, sit amet consectetur adipisicing elit.
                   Rerum consequatur similique, facere nulla tempore nesciunt
-                  illo dolor minus repellat! Pariatur
                </p>
                {isLogin ? <Login /> : <Register />}
                {isLogin ? (

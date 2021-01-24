@@ -1,65 +1,107 @@
 import Head from 'next/head'
-import styles from '../styles/Home.module.css'
+
+import Team from '../components/Team'
+import TeamsRow from '../components/TeamsRow'
+import { useTeamState } from '../context/teamContext'
+
+const teamsOfSpain = [
+   {
+      team_id: '541',
+      name: 'Real Madrid',
+      logo: 'https://media.api-sports.io/football/teams/541.png',
+   },
+   {
+      team_id: '529',
+      name: 'Barcelona',
+      logo: 'https://media.api-sports.io/football/teams/529.png',
+   },
+   {
+      team_id: '530',
+      name: 'Atletico Madrid',
+      logo: 'https://media.api-sports.io/football/teams/530.png',
+   },
+   {
+      team_id: '535',
+      name: 'Malaga FC',
+      logo: 'https://media.api-sports.io/football/teams/535.png',
+   },
+]
+const teamsOfEngland = [
+   {
+      team_id: '49',
+      name: 'Chelsea',
+      logo: 'https://media.api-sports.io/football/teams/49.png',
+   },
+   {
+      team_id: '33',
+      name: 'Manchester United',
+      logo: 'https://media.api-sports.io/football/teams/33.png',
+   },
+   {
+      team_id: '40',
+      name: 'Liverpool',
+      logo: 'https://media.api-sports.io/football/teams/40.png',
+   },
+   {
+      team_id: '50',
+      name: 'Man. City',
+      logo: 'https://media.api-sports.io/football/teams/50.png',
+   },
+]
+const otherTeams = [
+   {
+      team_id: '157',
+      name: 'Bayern Munich',
+      logo: 'https://media.api-sports.io/football/teams/157.png',
+   },
+   {
+      team_id: '85',
+      name: 'Paris Saint Germain',
+      logo: 'https://media.api-sports.io/football/teams/85.png',
+   },
+   {
+      team_id: '194',
+      name: 'Ajax',
+      logo: 'https://media.api-sports.io/football/teams/194.png',
+   },
+   {
+      team_id: '157',
+      name: 'Bayern Munich',
+      logo: 'https://media.api-sports.io/football/teams/157.png',
+   },
+]
 
 export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+   const { team } = useTeamState()
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+   return (
+      <>
+         <Head>
+            <title>Football App</title>
+            <link rel='icon' href='/favicon.ico' />
+         </Head>
+         <>
+            <div className='grid gap-4 p-3 md:grid-cols-8'>
+               <div className='col-span-5'>
+                  <TeamsRow country='Spain' teams={teamsOfSpain} />
+                  <TeamsRow country='England' teams={teamsOfEngland} />
+                  <TeamsRow country='Others' teams={otherTeams} />
+               </div>
+               <div className='col-span-3 '>
+                  <h1 className='my-3 text-2xl font-bold text-center text-green'>
+                     My Team
+                  </h1>
+                  {team ? (
+                     <Team team={team} showName={false} largeLogo />
+                  ) : (
+                     'Choose a team'
+                  )}
+               </div>
+            </div>
+            <button className='block w-8/12 p-4 mx-auto my-4 text-2xl font-semibold text-white rounded-full focus:outline-none bg-gradient-to-r from-green to-blue-500'>
+               {team ? 'Great!Continue...' : 'Choose Your Team 🚀'}
+            </button>
+         </>
+      </>
+   )
 }

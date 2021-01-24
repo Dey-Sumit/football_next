@@ -14,3 +14,21 @@ body {
       ),
       url('https://static.toiimg.com/photo/64697339.cms');
 }
+
+.boxShadow {
+   box-shadow: 7px 7px 14px #131514, -7px -7px 14px #292d2c;
+   /* background: linear-gradient(135deg, #202322, #1b1e1d); */
+}
+.logo-medium {
+   width: 100px;
+   height: 100px;
+}
+.logo-small {
+   width: 50px;
+   height: 50px;
+}
+
+.logo-large {
+   width: 160px;
+   height: 160px;
+}
