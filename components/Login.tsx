@@ -1,15 +1,47 @@
 import { useForm } from 'react-hook-form'
+import { useRouter } from 'next/router'
+
 import { MdEmail, MdLock } from 'react-icons/md'
+// import { useAuthDispatch, useAuthState } from '../context/authContext'
 import Input from './Input'
+// import { AUTH_SUCCESS } from '../context/authReducer'
+// import { auth } from '../config/firebase'
+import { useState } from 'react'
+import { BiLoaderAlt } from 'react-icons/bi'
+import { useAuth } from '../context/authContext'
 
 export default function Login() {
+   const { signIn } = useAuth()
+   const router = useRouter()
+
+   const [loading, setLoading] = useState(false)
+
    const { register, errors, handleSubmit } = useForm({
       mode: 'onBlur',
    })
+   // // send to an action creator
+   // const signIn = async ({ email, password }) => {
+   //    try {
+   //       const res = await auth.signInWithEmailAndPassword(email, password)
+   //       dispatch(AUTH_SUCCESS, res.user)
+   //    } catch (error) {
+   //       throw error.message
+   //    }
+   // }
+
    //TODO solve type any!
-   const handleClick = (data: any) => {
-      console.log(data)
+   const handleClick = async (data: any) => {
+      try {
+         setLoading(true)
+         await signIn(data)
+         router.push('/')
+      } catch (error) {
+         console.log({ error })
+      } finally {
+         setLoading(false)
+      }
    }
+
    return (
       <div className='mt-8'>
          <form
@@ -44,11 +76,19 @@ export default function Login() {
                error={errors.password}
             />
 
-            <button
-               type='submit'
-               className='p-2 text-base font-medium text-white rounded-lg bg-green'>
-               Login
-            </button>
+            {!loading ? (
+               <button
+                  type='submit'
+                  className='p-2 text-base font-medium text-white rounded-lg bg-green'>
+                  Login
+               </button>
+            ) : (
+               <button
+                  type='submit'
+                  className='flex items-center justify-center p-2 text-base font-medium text-white rounded-lg bg-green'>
+                  <BiLoaderAlt className='mr-2 animate-spin' /> Processing
+               </button>
+            )}
          </form>
 
          {/*//TODO line */}

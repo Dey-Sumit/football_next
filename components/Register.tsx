@@ -1,18 +1,58 @@
+import { useRouter } from 'next/router'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { BiUserCircle } from 'react-icons/bi'
-import { IoMdLock } from 'react-icons/io'
+import { BiLoaderAlt, BiUserCircle } from 'react-icons/bi'
 import { MdEmail, MdLock } from 'react-icons/md'
+import { auth, db } from '../config/firebase'
+import { AUTH_SUCCESS } from '../context/authReducer'
 import Input from './Input'
 
 export default function Register() {
    const { register, errors, handleSubmit } = useForm({
       mode: 'onBlur',
    })
+   const [loading, setLoading] = useState(false)
+   // const dispatch = useAuthDispatch()
+
+   const router = useRouter()
    //TODO solve type any!
-   const handleClick = (data: any) => {
-      console.log(data)
+   const handleClick = async (data: any) => {
+      try {
+         setLoading(true)
+         await signUp(data)
+         router.push('/')
+      } catch (error) {
+         console.log({ error })
+      } finally {
+         setLoading(false)
+      }
    }
 
+   const createUser = async (user: any) => {
+      try {
+         console.log(user)
+
+         await db.collection('users').doc(user.uid).set(user)
+      } catch (error) {
+         console.log({ error })
+         throw error.message
+      }
+   }
+
+   const signUp = async ({ username, email, password }) => {
+      try {
+         const res = await auth.createUserWithEmailAndPassword(email, password)
+         // return the user(response)
+
+         await createUser({ uid: res.user.uid, email, username })
+         console.log(res.user)
+
+         // dispatch(AUTH_SUCCESS, res.user)
+      } catch (error) {
+         console.log({ error })
+         throw error.message
+      }
+   }
    return (
       <div className='mt-5'>
          <form
@@ -57,11 +97,19 @@ export default function Register() {
                error={errors.password}
             />
 
-            <button
-               type='submit'
-               className='p-2 mt-5 text-base font-medium text-white rounded-lg bg-green focus:outline-none'>
-               Register
-            </button>
+            {!loading ? (
+               <button
+                  type='submit'
+                  className='p-2 text-base font-medium text-white rounded-lg bg-green'>
+                  Register
+               </button>
+            ) : (
+               <button
+                  type='submit'
+                  className='flex items-center justify-center p-2 text-base font-medium text-white rounded-lg bg-green'>
+                  <BiLoaderAlt className='mr-2 animate-spin' /> Processing
+               </button>
+            )}
          </form>
          {/* line */}
          <p className='my-4 text-center text-gray-400'>or continue with</p>
