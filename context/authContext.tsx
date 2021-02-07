@@ -7,6 +7,7 @@ import {
 } from 'react'
 import { auth, auth as firebaseAuth, db } from '../config/firebase'
 // import authReducer, { AUTH_SUCCESS } from './authReducer'
+import { UPDATE_PROFILE, AUTH_SUCCESS } from './actionTypes'
 
 const useAuthProvider = () => {
    // get user from local storage
@@ -69,49 +70,81 @@ const useAuthProvider = () => {
    return { user, loading, signUp, signOut, signIn, getUserAdditionalData }
 }
 
-const AuthContext = createContext({ user: {} })
-// const AuthDispatchContext = createContext(null)
+interface State {
+   uid: string
+   team: any
+   email: string
+}
+interface Action {
+   type: string
+   payload: any
+}
+
+const reducer = (state: State, { type, payload }: Action) => {
+   switch (type) {
+      case UPDATE_PROFILE:
+         return {
+            ...state,
+            team: payload,
+         }
+      case AUTH_SUCCESS:
+         return {
+            ...state,
+            ...payload,
+         }
+
+      default:
+         throw new Error(`Unknown action type"${type}`)
+   }
+}
+const AuthContext = createContext({ uid: null, team: null, email: null })
+const AuthDispatchContext = createContext(null)
 
 // from props de-structure the children
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
    //    const auth = useAuthProvider()
 
-   // const [auth, defaultDispatch] = useReducer(authReducer, { user: {} })
+   const [state, defaultDispatch] = useReducer(reducer, {
+      //use localhost
+      uid: null,
+      team: null,
+      email: null,
+   })
 
-   // const dispatch = (type: string, payload?: any) =>
-   //    defaultDispatch({ type, payload })
+   const dispatch = (type: string, payload?: any) =>
+      defaultDispatch({ type, payload })
 
    const auth = useAuthProvider()
 
-   const handleAuthStateChanged = async (user: any) => {
-      if (user) {
-         try {
-            await auth.getUserAdditionalData(user)
+   // const handleAuthStateChanged = async (user: any) => {
+   //    if (user) {
+   //       try {
+   //          await auth.getUserAdditionalData(user)
 
-            // dispatch(AUTH_SUCCESS, res)
-         } catch (error) {
-            console.log({ error: error.message })
-         }
-      }
-   }
+   //          // dispatch(AUTH_SUCCESS, res)
+   //       } catch (error) {
+   //          console.log({ error: error.message })
+   //       }
+   //    }
+   // }
 
-   useEffect(() => {
-      const unSub = firebaseAuth.onAuthStateChanged(handleAuthStateChanged)
+   // useEffect(() => {
+   //    const unSub = firebaseAuth.onAuthStateChanged(handleAuthStateChanged)
 
-      return () => unSub()
-   }, [])
+   //    return () => unSub()
+   // }, [])
 
    return (
-      // <AuthDispatchContext.Provider value={dispatch}>
-      <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>
-      // </AuthDispatchContext.Provider>
+      <AuthDispatchContext.Provider value={dispatch}>
+         <AuthContext.Provider value={state}>{children}</AuthContext.Provider>
+      </AuthDispatchContext.Provider>
    )
 }
 
 //TODO FIX ALL ANY
-export const useAuth: any = () => {
+export const useAuth = () => {
    return useContext(AuthContext)
 }
-// export const useAuthDispatch: any = () => {
-//    return useContext(AuthDispatchContext)
-// }
+export const useAuthDispatch: any = () => {
+   return useContext(AuthDispatchContext)
+}

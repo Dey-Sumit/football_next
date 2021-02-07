@@ -11,7 +11,7 @@ import { BiLoaderAlt } from 'react-icons/bi'
 import { useAuth } from '../context/authContext'
 
 export default function Login() {
-   const { signIn } = useAuth()
+   // const { signIn } = useAuth()
    const router = useRouter()
 
    const [loading, setLoading] = useState(false)
@@ -33,7 +33,7 @@ export default function Login() {
    const handleClick = async (data: any) => {
       try {
          setLoading(true)
-         await signIn(data)
+         // await signIn(data)
          router.push('/')
       } catch (error) {
          console.log({ error })

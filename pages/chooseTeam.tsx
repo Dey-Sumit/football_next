@@ -1,8 +1,13 @@
+import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import Head from 'next/head'
+import { useRouter } from 'next/router'
 import Search from '../components/Search'
 
 import Team from '../components/Team'
 import TeamsRow from '../components/TeamsRow'
+import { db } from '../config/firebase'
+import { UPDATE_PROFILE } from '../context/actionTypes'
+import { useAuth, useAuthDispatch } from '../context/authContext'
 import { useTeamState } from '../context/teamContext'
 
 const teamsOfSpain = [
@@ -65,15 +70,26 @@ const otherTeams = [
       name: 'Ajax',
       logo: 'https://media.api-sports.io/football/teams/194.png',
    },
-   {
-      team_id: '157',
-      name: 'Bayern Munich',
-      logo: 'https://media.api-sports.io/football/teams/157.png',
-   },
 ]
 
-export default function Home() {
+export default function ChooseTeam() {
    const { team } = useTeamState()
+   const { uid } = useAuth()
+   const dispatch = useAuthDispatch()
+   const router = useRouter()
+
+   const update_profile = async () => {
+      try {
+         await db.collection('profiles').doc(uid).update({
+            team: team,
+         })
+         const doc = await db.collection('profiles').doc(uid).get()
+         dispatch(UPDATE_PROFILE, doc.data())
+         router.push('/')
+      } catch (error) {
+         console.error(error)
+      }
+   }
 
    return (
       <>
@@ -102,10 +118,23 @@ export default function Home() {
                   <Search title='Search Team' />
                </div>
             </div>
-            <button className='block w-8/12 p-4 mx-auto my-4 text-2xl font-semibold text-white rounded-full focus:outline-none bg-gradient-to-r from-green to-blue-500'>
+            <button
+               className='block w-8/12 p-4 mx-auto my-4 text-2xl font-semibold text-white rounded-full focus:outline-none bg-gradient-to-r from-green to-blue-500'
+               onClick={() => update_profile()}>
                {team ? 'Great!Continue...' : 'Choose Your Team 🚀'}
             </button>
          </>
       </>
    )
+}
+
+export const getServerSideProps = (ctx: GetServerSidePropsContext) => {
+   //check if the user has a team or not
+   // check if the user is authenticated
+
+   return {
+      props: {
+         a: 'a',
+      },
+   }
 }

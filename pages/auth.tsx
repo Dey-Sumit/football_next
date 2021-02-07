@@ -1,9 +1,11 @@
+import { GetServerSidePropsContext } from 'next'
 import { useState } from 'react'
 import Login from '../components/Login'
 import Register from '../components/Register'
+import { auth } from '../config/firebase'
 export default function Auth() {
    const [isLogin, setIsLogin] = useState(true)
-
+   //TODO font-serif globally | search better font
    return (
       <div className='h-screen p-2 font-serif md:px-12 md:py-20 xl:px-40 xl:py-24'>
          <div className='grid h-full gap-3 overflow-hidden border-2 rounded-lg lg:border-yellow-700 xl:border-yellow-100 md:grid-cols-8'>
@@ -25,8 +27,8 @@ export default function Auth() {
                   Lorem ipsum dolor, sit amet consectetur adipisicing elit.
                   Rerum consequatur similique, facere nulla tempore nesciunt
                </p>
-               {isLogin ? <Login /> : <Register />}
-               {isLogin ? (
+               {!isLogin ? <Login /> : <Register />}
+               {!isLogin ? (
                   <p className='my-3 text-center text-white'>
                      Already a member?{' '}
                      <span
@@ -49,4 +51,22 @@ export default function Auth() {
          </div>
       </div>
    )
+}
+
+export const getServerSideProps = (ctx: GetServerSidePropsContext) => {
+   auth.onAuthStateChanged(user => {
+      if (user) {
+         console.log(user)
+         console.log('Logged in')
+      } else {
+         console.log(user)
+         console.log('not logged in')
+      }
+   })
+
+   return {
+      props: {
+         a: 'a',
+      },
+   }
 }

@@ -14,17 +14,17 @@ const index = () => {
                ? `You are logged in as ${user?.email}`
                : 'Not logged in'
             : 'loading...'}
-         <button onClick={() => signOut()}>SignOut</button>
+
          <>
             <div className='md:px-40'>
                <div className='grid gap-8 p-4 md:grid-cols-12'>
                   <div className='md:col-span-5 '>
                      <h5 className='text-center'>Fixtures</h5>
-                     <Fixtures />
+                     {/* <Fixtures /> */}
                   </div>
                   <div className='md:col-span-7 '>
                      <h5 className='text-center'>Last Match Details</h5>
-                     <FixtureDetails />
+                     {/* <FixtureDetails /> */}
                   </div>
                </div>
             </div>

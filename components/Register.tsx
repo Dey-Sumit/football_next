@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { BiLoaderAlt, BiUserCircle } from 'react-icons/bi'
 import { MdEmail, MdLock } from 'react-icons/md'
 import { auth, db } from '../config/firebase'
+import { useAuthDispatch } from '../context/authContext'
 import { AUTH_SUCCESS } from '../context/authReducer'
 import Input from './Input'
 
@@ -12,15 +13,16 @@ export default function Register() {
       mode: 'onBlur',
    })
    const [loading, setLoading] = useState(false)
-   // const dispatch = useAuthDispatch()
+   const dispatch = useAuthDispatch()
 
    const router = useRouter()
+
    //TODO solve type any!
    const handleClick = async (data: any) => {
       try {
          setLoading(true)
          await signUp(data)
-         router.push('/')
+         router.push('/chooseTeam')
       } catch (error) {
          console.log({ error })
       } finally {
@@ -28,11 +30,10 @@ export default function Register() {
       }
    }
 
-   const createUser = async (user: any) => {
+   const createProfile = (user: any) => {
       try {
-         console.log(user)
-
-         await db.collection('users').doc(user.uid).set(user)
+         // directly return the promise
+         return db.collection('profiles').doc(user.uid).set(user)
       } catch (error) {
          console.log({ error })
          throw error.message
@@ -42,12 +43,15 @@ export default function Register() {
    const signUp = async ({ username, email, password }) => {
       try {
          const res = await auth.createUserWithEmailAndPassword(email, password)
-         // return the user(response)
+         // create profile in db
+         await createProfile({ uid: res.user.uid, email, username })
 
-         await createUser({ uid: res.user.uid, email, username })
-         console.log(res.user)
-
-         // dispatch(AUTH_SUCCESS, res.user)
+         dispatch(AUTH_SUCCESS, {
+            uid: res.user.uid,
+            email,
+            username,
+            team: null,
+         })
       } catch (error) {
          console.log({ error })
          throw error.message
