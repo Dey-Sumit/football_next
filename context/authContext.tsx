@@ -5,22 +5,45 @@ import {
    useReducer,
    useState,
 } from 'react'
-import { auth, auth as firebaseAuth, db } from '../config/firebase'
-// import authReducer, { AUTH_SUCCESS } from './authReducer'
-import { UPDATE_PROFILE, AUTH_SUCCESS } from './actionTypes'
+
+import firebase from 'firebase/app'
+import 'firebase/auth'
+
+import { db, auth } from '../config/firebaseClient'
+
+interface IUser {
+   uid: string
+   email: string
+   username: string
+   team: null
+}
+
+interface IContext {
+   user: IUser
+   loading: boolean
+   isAuthenticated: boolean
+   signUp: Function
+   signIn: Function
+   signOut: Function
+   updateProfile: Function
+   error: {} | null
+}
+
+const AuthContext = createContext<IContext | null>(null)
 
 const useAuthProvider = () => {
    // get user from local storage
-   const [user, setUser] = useState(null)
+   const [user, setUser] = useState(null) // change to profile
+   const [isAuthenticated, setIsAuthenticated] = useState(false)
    const [loading, setLoading] = useState(true)
+   //TODO handle error
+   const [error, setError] = useState(null)
+
    const signIn = async ({ email, password }) => {
       try {
          setLoading(true)
-         const res = await firebaseAuth.signInWithEmailAndPassword(
-            email,
-            password
-         )
-         setUser(res.user)
+         const res = await auth.signInWithEmailAndPassword(email, password)
+         setIsAuthenticated(true)
          await getUserAdditionalData(res)
          setLoading(false)
          return res.user
@@ -29,122 +52,148 @@ const useAuthProvider = () => {
          throw error.message
       }
    }
-   const signOut = async () => {
-      await auth.signOut()
+   const signOut = () => {
       setUser(null)
+      setIsAuthenticated(false)
+      return auth.signOut()
    }
-   const createUser = async (user: any) => {
+
+   const createProfile = async (user: IUser) => {
       try {
-         await db.collection('users').doc(user.uid).set(user)
          setUser(user)
+         return await db.collection('profiles').doc(user.uid).set(user)
       } catch (error) {
-         console.log(error)
+         console.log({ error })
+         return { error }
       }
    }
    const signUp = async ({ username, email, password }) => {
       try {
          const res = await auth.createUserWithEmailAndPassword(email, password)
-         // return the user(response)
-
-         await createUser({ uid: res.user.uid, email, username })
-
-         return res
+         setIsAuthenticated(true)
+         return createProfile({
+            uid: res.user.uid,
+            email,
+            username,
+            team: null,
+         })
       } catch (error) {
-         console.log(error)
+         console.log({ error })
+         return { error }
       }
    }
 
-   const getUserAdditionalData = async (user: any) => {
+   const getUserAdditionalData = async (uid: string) => {
       try {
          setLoading(true)
-         const res = await db.collection('users').doc(user.uid).get()
-         setUser(res.data())
+         const res = await db.collection('profiles').doc(uid).get()
+         if (res.data()) setUser(res.data())
          setLoading(false)
       } catch (error) {
+         setLoading(false)
          console.log({ error })
-
          throw error.message
       }
    }
-
-   return { user, loading, signUp, signOut, signIn, getUserAdditionalData }
-}
-
-interface State {
-   uid: string
-   team: any
-   email: string
-}
-interface Action {
-   type: string
-   payload: any
-}
-
-const reducer = (state: State, { type, payload }: Action) => {
-   switch (type) {
-      case UPDATE_PROFILE:
-         return {
-            ...state,
-            team: payload,
+   const handleAuthStateChanged = (user: firebase.User) => {
+      if (user) {
+         setIsAuthenticated(true)
+         try {
+            getUserAdditionalData(user.uid)
+         } catch (error) {
+            throw error.message
          }
-      case AUTH_SUCCESS:
-         return {
-            ...state,
-            ...payload,
-         }
+      } else {
+         setIsAuthenticated(false)
+      }
+      setLoading(false)
+   }
+   //change any
+   const updateProfile = async (team: any) => {
+      try {
+         await db.collection('profiles').doc(user.uid).update({
+            team,
+         })
+         setUser({ ...user, team })
+         // const doc = await db.collection('profiles').doc(user.uid).get()
+         // console.log(doc.data())
 
-      default:
-         throw new Error(`Unknown action type"${type}`)
+         // dispatch(UPDATE_PROFILE, doc.data())
+      } catch (error) {
+         console.error(error)
+      }
+   }
+   useEffect(() => {
+      const unSub = auth.onAuthStateChanged(handleAuthStateChanged)
+
+      return () => unSub()
+   }, [])
+
+   //subscribe to changes on document
+   useEffect(() => {
+      if (isAuthenticated) {
+         // Subscribe to user document on mount
+         const unsubscribe = db
+            .collection('profiles')
+            .doc(user.uid)
+            .onSnapshot(doc => setUser(doc.data()))
+         return () => unsubscribe()
+      }
+   }, [])
+
+   return {
+      user,
+      loading,
+      isAuthenticated,
+      error,
+      signUp,
+      signOut,
+      signIn,
+      updateProfile,
    }
 }
-const AuthContext = createContext({ uid: null, team: null, email: null })
-const AuthDispatchContext = createContext(null)
+
+// interface State {
+//    uid: string
+//    team: any
+//    email: string
+// }
+// interface Action {
+//    type: string
+//    payload: any
+// }
+
+// const reducer = (state: State, { type, payload }: Action) => {
+//    switch (type) {
+//       case UPDATE_PROFILE:
+//          return {
+//             ...state,
+//             team: payload,
+//          }
+//       case AUTH_SUCCESS:
+//          return {
+//             ...state,
+//             ...payload,
+//          }
+
+//       default:
+//          throw new Error(`Unknown action type"${type}`)
+//    }
+// }
+// const AuthDispatchContext = createContext(null)
 
 // from props de-structure the children
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-   //    const auth = useAuthProvider()
-
-   const [state, defaultDispatch] = useReducer(reducer, {
-      //use localhost
-      uid: null,
-      team: null,
-      email: null,
-   })
-
-   const dispatch = (type: string, payload?: any) =>
-      defaultDispatch({ type, payload })
-
    const auth = useAuthProvider()
 
-   // const handleAuthStateChanged = async (user: any) => {
-   //    if (user) {
-   //       try {
-   //          await auth.getUserAdditionalData(user)
-
-   //          // dispatch(AUTH_SUCCESS, res)
-   //       } catch (error) {
-   //          console.log({ error: error.message })
-   //       }
-   //    }
-   // }
-
-   // useEffect(() => {
-   //    const unSub = firebaseAuth.onAuthStateChanged(handleAuthStateChanged)
-
-   //    return () => unSub()
-   // }, [])
-
-   return (
-      <AuthDispatchContext.Provider value={dispatch}>
-         <AuthContext.Provider value={state}>{children}</AuthContext.Provider>
-      </AuthDispatchContext.Provider>
-   )
+   return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>
 }
 
 //TODO FIX ALL ANY
 export const useAuth = () => {
    return useContext(AuthContext)
 }
-export const useAuthDispatch: any = () => {
-   return useContext(AuthDispatchContext)
-}
+// export const useAuthDispatch: any = () => {
+//    return useContext(AuthDispatchContext)
+// }

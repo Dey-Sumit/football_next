@@ -1,12 +1,13 @@
 import { useRouter } from 'next/router'
 import Search from '../components/Search'
-import { auth } from '../config/firebase'
-
+import firebase from 'firebase/app'
+import { useAuth } from '../context/authContext'
 const Settings = () => {
    const { push } = useRouter()
+   const { signOut } = useAuth()
 
-   const handleLogOut = () => {
-      auth.signOut()
+   const handleLogOut = async () => {
+      await signOut()
       push('/auth')
    }
 

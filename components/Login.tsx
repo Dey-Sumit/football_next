@@ -9,33 +9,32 @@ import Input from './Input'
 import { useState } from 'react'
 import { BiLoaderAlt } from 'react-icons/bi'
 import { useAuth } from '../context/authContext'
+import 'firebase/auth'
+import firebase from 'firebase/app'
+// import firebaseClient from '../config/firebaseClient'
 
 export default function Login() {
-   // const { signIn } = useAuth()
-   const router = useRouter()
+   const { signIn } = useAuth()
+
+   // firebaseClient() // ?needed ?  :( check it
+
+   const { push } = useRouter()
 
    const [loading, setLoading] = useState(false)
 
    const { register, errors, handleSubmit } = useForm({
       mode: 'onBlur',
    })
-   // // send to an action creator
-   // const signIn = async ({ email, password }) => {
-   //    try {
-   //       const res = await auth.signInWithEmailAndPassword(email, password)
-   //       dispatch(AUTH_SUCCESS, res.user)
-   //    } catch (error) {
-   //       throw error.message
-   //    }
-   // }
+   // !send to an action creator
 
    //TODO solve type any!
    const handleClick = async (data: any) => {
       try {
          setLoading(true)
-         // await signIn(data)
-         router.push('/')
+         await signIn(data)
+         push('/')
       } catch (error) {
+         alert(error.message)
          console.log({ error })
       } finally {
          setLoading(false)

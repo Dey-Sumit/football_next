@@ -1,10 +1,18 @@
 import { GetServerSidePropsContext } from 'next'
-import { useState } from 'react'
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 import Login from '../components/Login'
 import Register from '../components/Register'
-import { auth } from '../config/firebase'
+import { auth as firebaseAuth } from '../config/firebaseClient'
+import { useAuth } from '../context/authContext'
 export default function Auth() {
+   const router = useRouter()
+   const auth = useAuth()
+
+   if (auth.user) router.back()
+
    const [isLogin, setIsLogin] = useState(true)
+
    //TODO font-serif globally | search better font
    return (
       <div className='h-screen p-2 font-serif md:px-12 md:py-20 xl:px-40 xl:py-24'>
@@ -28,7 +36,7 @@ export default function Auth() {
                   Rerum consequatur similique, facere nulla tempore nesciunt
                </p>
                {!isLogin ? <Login /> : <Register />}
-               {!isLogin ? (
+               {isLogin ? (
                   <p className='my-3 text-center text-white'>
                      Already a member?{' '}
                      <span
@@ -54,7 +62,7 @@ export default function Auth() {
 }
 
 export const getServerSideProps = (ctx: GetServerSidePropsContext) => {
-   auth.onAuthStateChanged(user => {
+   firebaseAuth.onAuthStateChanged(user => {
       if (user) {
          console.log(user)
          console.log('Logged in')

@@ -5,8 +5,7 @@ import { FOOTBALL_API_KEY } from '../secrets'
 import { SWRConfig } from 'swr'
 import { AuthProvider } from '../context/authContext'
 import Navbar from '../components/Navbar'
-import { GetServerSidePropsContext } from 'next'
-import { auth } from '../config/firebase'
+// import { GetServerSidePropsContext } from 'next'
 
 axios.defaults.baseURL = 'https://v2.api-football.com/'
 axios.defaults.headers.common['X-RapidAPI-Key'] = FOOTBALL_API_KEY
@@ -34,20 +33,20 @@ function MyApp({ Component, pageProps }) {
 
 export default MyApp
 
-export const getServerSideProps = (ctx: GetServerSidePropsContext) => {
-   auth.onAuthStateChanged(user => {
-      if (user) {
-         console.log(user)
-         console.log('Logged in')
-      } else {
-         console.log(user)
-         console.log('not logged in')
-      }
-   })
+// export const getServerSideProps = (ctx: GetServerSidePropsContext) => {
+//    auth.onAuthStateChanged(user => {
+//       if (user) {
+//          console.log(user)
+//          console.log('Logged in')
+//       } else {
+//          console.log(user)
+//          console.log('not logged in')
+//       }
+//    })
 
-   return {
-      props: {
-         a: 'a',
-      },
-   }
-}
+//    return {
+//       props: {
+//          a: 'a',
+//       },
+//    }
+// }

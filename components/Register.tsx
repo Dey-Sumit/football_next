@@ -3,17 +3,17 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { BiLoaderAlt, BiUserCircle } from 'react-icons/bi'
 import { MdEmail, MdLock } from 'react-icons/md'
-import { auth, db } from '../config/firebase'
-import { useAuthDispatch } from '../context/authContext'
-import { AUTH_SUCCESS } from '../context/authReducer'
+
+import 'firebase/auth'
 import Input from './Input'
+import { useAuth } from '../context/authContext'
 
 export default function Register() {
    const { register, errors, handleSubmit } = useForm({
       mode: 'onBlur',
    })
    const [loading, setLoading] = useState(false)
-   const dispatch = useAuthDispatch()
+   const { signUp, error } = useAuth()
 
    const router = useRouter()
 
@@ -30,33 +30,6 @@ export default function Register() {
       }
    }
 
-   const createProfile = (user: any) => {
-      try {
-         // directly return the promise
-         return db.collection('profiles').doc(user.uid).set(user)
-      } catch (error) {
-         console.log({ error })
-         throw error.message
-      }
-   }
-
-   const signUp = async ({ username, email, password }) => {
-      try {
-         const res = await auth.createUserWithEmailAndPassword(email, password)
-         // create profile in db
-         await createProfile({ uid: res.user.uid, email, username })
-
-         dispatch(AUTH_SUCCESS, {
-            uid: res.user.uid,
-            email,
-            username,
-            team: null,
-         })
-      } catch (error) {
-         console.log({ error })
-         throw error.message
-      }
-   }
    return (
       <div className='mt-5'>
          <form

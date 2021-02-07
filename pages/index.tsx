@@ -1,20 +1,19 @@
 import { GetServerSideProps } from 'next'
+import { useEffect } from 'react'
 import FixtureDetails from '../components/FixtureDetails'
 import Fixtures from '../components/Fixtures'
 import { useAuth } from '../context/authContext'
+import { useRequireAuth } from '../hooks/useRequireAuth'
+import { auth as firebaseAuth } from '../config/firebaseClient'
 
 const index = () => {
-   const { user, loading, signOut } = useAuth()
-   console.log(loading)
+   const { user } = useRequireAuth()
+
+   if (!user) return null
 
    return (
       <div className='text-white'>
-         {!loading
-            ? user
-               ? `You are logged in as ${user?.email}`
-               : 'Not logged in'
-            : 'loading...'}
-
+         {`You are logged in as ${user?.email}`}
          <>
             <div className='md:px-40'>
                <div className='grid gap-8 p-4 md:grid-cols-12'>
@@ -45,5 +44,7 @@ const index = () => {
 //       props: {},
 //    }
 // }
+
+//! on auth state change does not work in server side
 
 export default index

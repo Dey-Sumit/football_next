@@ -1,13 +1,14 @@
 import { GetServerSideProps, GetServerSidePropsContext } from 'next'
+import { route } from 'next/dist/next-server/server/router'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import Search from '../components/Search'
 
 import Team from '../components/Team'
 import TeamsRow from '../components/TeamsRow'
-import { db } from '../config/firebase'
+// import { db } from '../config/firebaseClient'
 import { UPDATE_PROFILE } from '../context/actionTypes'
-import { useAuth, useAuthDispatch } from '../context/authContext'
+import { useAuth } from '../context/authContext'
 import { useTeamState } from '../context/teamContext'
 
 const teamsOfSpain = [
@@ -74,21 +75,14 @@ const otherTeams = [
 
 export default function ChooseTeam() {
    const { team } = useTeamState()
-   const { uid } = useAuth()
-   const dispatch = useAuthDispatch()
+   const { user, loading, updateProfile } = useAuth()
    const router = useRouter()
+   //TODO use loading
+   if (user?.team) router.push('/')
 
-   const update_profile = async () => {
-      try {
-         await db.collection('profiles').doc(uid).update({
-            team: team,
-         })
-         const doc = await db.collection('profiles').doc(uid).get()
-         dispatch(UPDATE_PROFILE, doc.data())
-         router.push('/')
-      } catch (error) {
-         console.error(error)
-      }
+   const handleClick = () => {
+      updateProfile(team)
+      router.push('/')
    }
 
    return (
@@ -120,7 +114,7 @@ export default function ChooseTeam() {
             </div>
             <button
                className='block w-8/12 p-4 mx-auto my-4 text-2xl font-semibold text-white rounded-full focus:outline-none bg-gradient-to-r from-green to-blue-500'
-               onClick={() => update_profile()}>
+               onClick={() => handleClick()}>
                {team ? 'Great!Continue...' : 'Choose Your Team 🚀'}
             </button>
          </>

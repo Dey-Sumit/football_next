@@ -4,13 +4,16 @@ import ScrollToBottom from 'react-scroll-to-bottom'
 
 import FlipMove from 'react-flip-move'
 import { MdSend } from 'react-icons/md'
-import { db } from '../config/firebase'
+import { db } from '../config/firebaseClient'
 import Message from '../components/Message'
 import { useAuth } from '../context/authContext'
+import { useRequireAuth } from '../hooks/useRequireAuth'
 
 const ChatPage = () => {
    const [messages, setMessages] = useState([])
    const [text, setText] = useState('')
+   const auth = useRequireAuth()
+   if (!auth.user) return null
 
    // useEffect(() => {
    //    db.collection('globalChat')
@@ -36,7 +39,7 @@ const ChatPage = () => {
    }
 
    return (
-      <></>
+      <>chat page</>
       // <div className='chatPage'>
       //    <ScrollToBottom className='chatBox'>
       //       {messages.length > 0 ? (
